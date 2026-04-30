@@ -23,11 +23,11 @@ class ErrorFinanciero(ErrorSistemaFJ): # Excepción para errores de cálculos
     """ Indica inconsistencias en cálculos de costos o descuentos"""
     pass
 #  CREACION DE LA CLASE ABSTRACTA
-class EntidadSistema(ABC):
-    def __init__(self):
-        self.fecha_registro = datetime.datetime.now()
+class EntidadSistema(ABC):# Clase abstracta para entidades del sistema
+    def __init__(self):# Inicializador que marca la fecha de creación
+        self.fecha_registro = datetime.datetime.now() # Guarda la fecha actual
 
-    @abstractmethod
-    def mostrar_detalle(self):
+    @abstractmethod # Define un método que obliga a las subclases a implementarlo
+    def mostrar_detalle(self): # Método abstracto para mostrar información o detalle
         """ Garantiza la salida de información de cada subclase de manera correcta"""
         pass
