@@ -45,3 +45,18 @@ class Servicio(EntidadSistema, ABC):  # Clase base para todos los servicios
     def aplicar_iva(self, base, iva=0.19):  # Método para aplicar impuestos
         """Método para simular sobrecarga y cálculos base."""
         return base * (1 + iva)  # Retorna el valor con impuesto
+class ReservaSala(Servicio):  # Subclase para reserva de salas
+    def calcular_costo(self, horas, descuento=0, aplicar_impuesto=False):
+        if not isinstance(horas, (int, float)) or horas <= 0:  # Valida tipo y valor
+            raise DatosInvalidosError(f"Horas inválidas: {horas}")  # Anuncia la  excepción
+        
+        costo = (self.precio_base * horas) - descuento  # Calcula el costo final
+        if costo < 0:  # Valida que el costo no sea negativo
+            raise ErrorFinanciero("El descuento es mayor al costo.")  # Anuncia la excepción
+            
+        if aplicar_impuesto:  # Aplica impuestos si se requiere el servicio
+            costo = self.aplicar_iva(costo)  
+        return costo  # Retorna el costo calculado
+
+    def mostrar_detalle(self):  # Implementación del método abstracto
+        return f"[SERVICIO] Sala: {self.nombre} | Tarifa: ${self.precio_base}/hr"
