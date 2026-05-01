@@ -70,3 +70,13 @@ class AlquilerEquipos(Servicio):  # Subclase para alquiler de equipos
 
     def mostrar_detalle(self):  # Implementación del método abstracto
         return f"[SERVICIO] Equipo: {self.nombre} | Tarifa: ${self.precio_base}/día"
+class AsesoriaEspecializada(Servicio):  # Subclase para asesorías
+    def calcular_costo(self, sesiones, tipo_cliente="ESTANDAR"): # Cálculo de costo
+        if not isinstance(sesiones, (int, float)) or sesiones <= 0: # Valida sesiones
+            raise DatosInvalidosError(f"Sesiones inválidas: {sesiones}") # Error
+        
+        descuento = 0.85 if tipo_cliente.upper() == "PREMIUM" else 1.0 # Aplica dto
+        return (self.precio_base * sesiones) * descuento # Retorna total
+
+    def mostrar_detalle(self):  # Implementación del método abstracto
+        return f"[SERVICIO] Asesoría: {self.nombre} | Tarifa: ${self.precio_base}/sesión"
