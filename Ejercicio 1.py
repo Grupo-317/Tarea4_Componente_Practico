@@ -60,3 +60,13 @@ class ReservaSala(Servicio):  # Subclase para reserva de salas
 
     def mostrar_detalle(self):  # Implementación del método abstracto
         return f"[SERVICIO] Sala: {self.nombre} | Tarifa: ${self.precio_base}/hr"
+class AlquilerEquipos(Servicio):  # Subclase para alquiler de equipos
+    def calcular_costo(self, dias, incluye_seguro=False): # Método para calcular costos
+        if not isinstance(dias, (int, float)) or dias <= 0: # Valida los días para evitar errores 
+            raise DatosInvalidosError(f"Días inválidos: {dias}") # Muestra el mensaje de Error 
+        
+        recargo = 1.15 if incluye_seguro else 1.0  # Calcula recargo por seguro
+        return (self.precio_base * dias) * recargo  # Retorna costo total
+
+    def mostrar_detalle(self):  # Implementación del método abstracto
+        return f"[SERVICIO] Equipo: {self.nombre} | Tarifa: ${self.precio_base}/día"
