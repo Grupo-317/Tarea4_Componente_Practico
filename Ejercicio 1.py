@@ -31,3 +31,17 @@ class EntidadSistema(ABC):# Clase abstracta para entidades del sistema
     def mostrar_detalle(self): # Método abstracto para mostrar información o detalle
         """ Garantiza la salida de información de cada subclase de manera correcta"""
         pass
+    # CREACION DE LA CLASE ABSTRACTA SERVICIOS 
+class Servicio(EntidadSistema, ABC):  # Clase base para todos los servicios
+    def __init__(self, nombre, precio_base):  # Inicia con nombre y precio
+        super().__init__()  # Llama al constructor de la clase base
+        self.nombre = nombre  # Define el nombre del servicio
+        self.precio_base = precio_base  # Define el precio base del servicio
+
+    @abstractmethod  # Método abstracto de cálculo de costos
+    def calcular_costo(self, *args, **kwargs):  # Firma para cálculos específicos
+        pass
+
+    def aplicar_iva(self, base, iva=0.19):  # Método para aplicar impuestos
+        """Método para simular sobrecarga y cálculos base."""
+        return base * (1 + iva)  # Retorna el valor con impuesto
