@@ -80,3 +80,30 @@ class AsesoriaEspecializada(Servicio):  # Subclase para asesorías especializada
 
     def mostrar_detalle(self):  # Implementación del método abstracto
         return f"[SERVICIO] Asesoría: {self.nombre} | Tarifa: ${self.precio_base}/sesión"
+    # --- 4. CLIENTE (Encapsulación y Validaciones) ---
+class Cliente(EntidadSistema):  # Clase Cliente
+    def __init__(self, nombre, correo):  # Inicializa cliente
+        super().__init__()  # Llama al constructor base
+        self.nombre = nombre  # Usa el setter para validar
+        self.correo = correo  # Usa el setter para validar
+
+    @property  # Define getter para nombre
+    def nombre(self): return self.__nombre  # Retorna atributo privado
+
+    @nombre.setter  # Define setter para nombre
+    def nombre(self, valor):  # Valida nombre
+        if not valor or len(valor) < 3:  # Verifica longitud mínima
+            raise DatosInvalidosError("Nombre debe tener al menos 3 caracteres.")
+        self.__nombre = valor  # Asigna valor si es correcto
+
+    @property  # Define getter para correo
+    def correo(self): return self.__correo  # Retorna atributo privado
+
+    @correo.setter  # Define setter para correo
+    def correo(self, valor):  # Valida correo
+        if "@" not in valor or "." not in valor:  # Verifica formato
+            raise DatosInvalidosError(f"Formato '{valor}' es incorrecto.")
+        self.__correo = valor  # Asigna valor si es correcto
+
+    def mostrar_detalle(self):  # Implementación del método abstracto
+        return f"[CLIENTE] {self.nombre} ({self.correo})"
