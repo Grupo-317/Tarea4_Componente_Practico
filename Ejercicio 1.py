@@ -80,12 +80,12 @@ class AsesoriaEspecializada(Servicio):  # Subclase para asesorías especializada
 
     def mostrar_detalle(self):  # Implementación del método abstracto
         return f"[SERVICIO] Asesoría: {self.nombre} | Tarifa: ${self.precio_base}/sesión"
-    # --- 4. CLIENTE (Encapsulación y Validaciones) ---
+    # CREACION DE LA CLASE CLIENTE (Encapsulación y Validaciones) 
 class Cliente(EntidadSistema):  # Clase Cliente
-    def __init__(self, nombre, correo):  # Inicializa cliente
+    def __init__(self, nombre, correo):  # Nombre y correo del cliente 
         super().__init__()  # Llama al constructor base
-        self.nombre = nombre  # Usa el setter para validar
-        self.correo = correo  # Usa el setter para validar
+        self.nombre = nombre  # Usa el setter para validar si la informacion es correcta
+        self.correo = correo  # Usa el setter para validar si la informacion ingresada es correcta 
 
     @property  # Define getter para nombre
     def nombre(self): return self.__nombre  # Retorna atributo privado
