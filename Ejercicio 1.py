@@ -119,26 +119,26 @@ class Reserva(EntidadSistema):  # Define la subclase Reserva que hereda de Entid
         self.cantidad = cantidad  # Registra la informacion del producto en el momento de su compra:Hora,día o sesiones.
         self.params = params  # Registra otro tipo de informacion dada por el cliente.
         self.estado = "Registrada"  # Marca el inicio de la reserva en el sistema.
-    def procesar(self):  # Método principal para procesar la reserva
-        print(f"Procesando: {self.servicio.nombre} para {self.cliente.nombre}...")
+    def procesar(self):  # Mostrar en pantalla que servicio se esta atendiendo 
+        print(f"Procesando la informacion: {self.servicio.nombre} de {self.cliente.nombre}...")
         try:  # Bloque para manejo de errores
-            if self.estado == "PROCESADA":  # Valida estado previo
-                raise ServicioNoDisponibleError("Reserva ya procesada.") # Error
+            if self.estado == "PROCESADA":  # Valida si la reserva se completo de manera correcta.
+                raise ServicioNoDisponibleError("Error, esta informacion ya fue procesada.") # Mensaje de error 
 
             total = self.servicio.calcular_costo(self.cantidad, **self.params) # Ejecuta polimorfismo
             self.estado = "PROCESADA"  # Marca como éxito
-            return f"ÉXITO: Total a pagar: ${total:,.2f}" # Retorna mensaje
+            return f"Felicidades su informacion es correcta: Total a pagar: ${total:,.2f}" # Retorna mensaje
 
         except (DatosInvalidosError, ErrorFinanciero) as e: # Captura errores de negocio
-            self.estado = "FALLIDA"  # Actualiza estado a fallida
-            raise ErrorSistemaFJ(f"Error negocio: {e}") from e # Encadena error
+            self.estado = "Error informacion incorrecta"  # Actualiza estado a fallida
+            raise ErrorSistemaFJ(f"Error, datos ingresados de forma invalida: {e}") from e # Mensaje de  error
         
         except Exception as e:  # Captura otros errores inesperados
-            self.estado = "ERROR_SISTEMA"  # Actualiza estado a error
-            raise ErrorSistemaFJ(f"Fallo inesperado: {e}") from e # Encadena error
+            self.estado = "Error en el sistema"  # Actualiza estado a error
+            raise ErrorSistemaFJ(f"Error, se evidencia fallas en el sistema : {e}") from e # Mensaje de error
         
         finally:  # Bloque que siempre se ejecuta al final
-            print(f"Estado final: {self.estado}") # Imprime resultado final
+            print(f"Estado final: {self.estado}") # Se evidencia un mensaje de  resultado final
 
     def mostrar_detalle(self):  # Implementación del método abstracto
         return f"[RESERVA] Cliente: {self.cliente.nombre} | Estado: {self.estado}"        
