@@ -123,24 +123,24 @@ class Reserva(EntidadSistema):  # Define la subclase Reserva que hereda de Entid
         print(f"Procesando la informacion: {self.servicio.nombre} de {self.cliente.nombre}...")
         try:  # Bloque para manejo de errores
             if self.estado == "PROCESADA":  # Valida si la reserva se completo de manera correcta.
-                raise ServicioNoDisponibleError("Error, esta informacion ya fue procesada.") # Mensaje de error 
+                raise ServicioNoDisponibleError("Error, esta informacion ya fue procesada.") # Mensaje de error. 
 
-            total = self.servicio.calcular_costo(self.cantidad, **self.params) # Ejecuta polimorfismo
+            total = self.servicio.calcular_costo(self.cantidad, **self.params) # Ejecuta polimorfismo.
             self.estado = "PROCESADA"  # Marca como éxito
-            return f"Felicidades su informacion es correcta: Total a pagar: ${total:,.2f}" # Retorna mensaje
+            return f"Felicidades su informacion es correcta: Total a pagar: ${total:,.2f}" # Mensaje cuando la informacion se ingresa de manera correcta.
 
-        except (DatosInvalidosError, ErrorFinanciero) as e: # Captura errores de negocio
-            self.estado = "Error informacion incorrecta"  # Actualiza estado a fallida
+        except (DatosInvalidosError, ErrorFinanciero) as e: # Captura errores de negocio.
+            self.estado = "Error informacion incorrecta"  # Mensaje de error cuando la informacion  es invalida.
             raise ErrorSistemaFJ(f"Error, datos ingresados de forma invalida: {e}") from e # Mensaje de  error
         
-        except Exception as e:  # Captura otros errores inesperados
-            self.estado = "Error en el sistema"  # Actualiza estado a error
-            raise ErrorSistemaFJ(f"Error, se evidencia fallas en el sistema : {e}") from e # Mensaje de error
+        except Exception as e:  # Captura otros errores.
+            self.estado = "Error en el sistema"  # Actualiza estado a error a travez de este mensaje.
+            raise ErrorSistemaFJ(f"Error, se evidencia fallas en el sistema : {e}") from e # Mensaje de error.
         
         finally:  # Bloque que siempre se ejecuta al final
-            print(f"Estado final: {self.estado}") # Se evidencia un mensaje de  resultado final
+            print(f"Estado final: {self.estado}") # Se evidencia un mensaje de  resultado final.
 
-    def mostrar_detalle(self):  # Implementación del método abstracto
+    def mostrar_detalle(self):  # Implementacion  del método abstracto.
         return f"[RESERVA] Cliente: {self.cliente.nombre} | Estado: {self.estado}"
 
       
