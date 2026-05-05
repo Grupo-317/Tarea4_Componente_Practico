@@ -141,5 +141,6 @@ class Reserva(EntidadSistema):  # Define la subclase Reserva que hereda de Entid
             print(f"Estado final: {self.estado}") # Se evidencia un mensaje de  resultado final
 
     def mostrar_detalle(self):  # Implementación del método abstracto
-        return f"[RESERVA] Cliente: {self.cliente.nombre} | Estado: {self.estado}"        
+        return f"[RESERVA] Cliente: {self.cliente.nombre} | Estado: {self.estado}"
+
       
