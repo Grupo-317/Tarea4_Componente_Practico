@@ -142,5 +142,12 @@ class Reserva(EntidadSistema):  # Define la subclase Reserva que hereda de Entid
 
     def mostrar_detalle(self):  # Implementacion  del método abstracto.
         return f"[RESERVA] Cliente: {self.cliente.nombre} | Estado: {self.estado}"
+def registrar_log(mensaje, nivel="Sistema"):  # Función para registrar logs
+    try:  # Intenta abrir el archivo
+        with open("log_software_fj.txt", "a", encoding="utf-8") as f:
+            ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") # Formato fecha
+            f.write(f"[{ts}] [{nivel}] {mensaje}\n") # Escribe el registro
+    except IOError as e:  # Maneja error si no hay acceso al archivo
+        print(f" Error, No se pudo escribir en log: {e}")
 
       
