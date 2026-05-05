@@ -107,3 +107,16 @@ class Cliente(EntidadSistema):  # Clase Cliente
 
     def mostrar_detalle(self):  # Implementación del método abstracto
         return f"[CLIENTE] {self.nombre} ({self.correo})"
+# CREACION DE LA CLASERESERVA (Gestión y Excepciones)
+class Reserva(EntidadSistema):  # Define la subclase Reserva que hereda de EntidadSistema
+    def __init__(self, cliente, servicio, cantidad, **params): # Prepara los datos necesarios para registrar una nueva reserva.
+        super().__init__()  # Constructor base
+        if not isinstance(cliente, Cliente) or not isinstance(servicio, Servicio):
+            raise DatosInvalidosError(" Error. Ingrese los datos de manera correcta, por favor.") # Mensaje de error 
+        
+        self.cliente = cliente  # Registra la informacion del cliente que hace la reserva
+        self.servicio = servicio  # registra la informacion de las compras que hace el cliente
+        self.cantidad = cantidad  # Registra la informacion del producto en el momento de su compra:Hora,día o sesiones.
+        self.params = params  # Registra otro tipo de informacion dada por el cliente.
+        self.estado = "Registrada"  # Marca el inicio de la reserva en el sistema.
+      
