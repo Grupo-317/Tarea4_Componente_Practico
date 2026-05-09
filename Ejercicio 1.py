@@ -186,7 +186,7 @@ def ejecutar_sistema():# Funcion principal para que se ejecute todo el sistema.
             resultado = op() # Se ejecuta las 10 operaciones con la funcion Lambda.
             if resultado:  # Evidencia si hay un resultado exitoso.
                 print(resultado) # Muestra el total a pagar. 
-                registrar_log(f"Operacion {i}: {resultado}") # Guarda en registra_log
+                registrar_log(f"Operacion {i}: {resultado}") # Guarda en registra_log.
             else:
                 # Caso de creación de clientes exitosa (aunque en la lista fallan)
                 print("Proceso exitoso") # Muestra mensaje si es correcto.
