@@ -261,7 +261,7 @@ def menu():
         op = input("\nSeleccione una opcion: ")# Solicita la opcion al usuario.
         try:
             if op == "1": # OPCION 1: REGISTRAR NUEVO CLIENTE
-            
+        
             # 1. Validar NOMBRE (mínimo 3 caracteres)
                 while True:
                      nombre = input("Nombre completo: ")
@@ -328,7 +328,8 @@ def menu():
         except Exception as e: # Captura  otra excepcion ingresada por el usurio.
             print(f"Error inesperado: {e}") # Mensaje de error.
             LoggerSistema.registrar_error(e, "Interfaz_Usuario") # Registra el error detallado en el sistema de logs.
-            # Llama a la función menú para iniciar el programa
+            
+ # Llama a la función menú para iniciar el programa           
 if __name__ == "__main__":
     menu()
 
