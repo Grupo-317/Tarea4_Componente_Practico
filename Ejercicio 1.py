@@ -104,39 +104,31 @@ class Cliente(EntidadSistema): # Creamos la clase Cliente
         return f"Cliente: {self.nombre} | Email: {self.correo}"    # Muestra en pantalla cliente: nombre y correo.       
 class ReservaSala(Servicio):  # Subclase para reserva de salas.
     def calcular_costo(self, horas, descuento=0, aplicar_impuesto=False):
-        if not isinstance(horas, (int, float)) or horas <= 0:  # Valida tipo y valor.
-            raise DatosInvalidosError(f"Horas inválidas: {horas}")  # Anuncia la  excepcion.
-        
-        costo = (self.precio_base * horas) - descuento  # Calcula el costo final.
-        if costo < 0:  # Valida que el costo no sea negativo
-            raise ErrorFinanciero("El descuento es mayor al costo.")  # Anuncia la excepcion.
-            
-        if aplicar_impuesto:  # Aplica impuestos si se requiere el servicio.
-            costo = self.aplicar_iva(costo)  
-        return costo  # Retorna el costo calculado.
+        if float(horas) <= 0: raise DatosInvalidosError("Las horas deben ser positivas")
+        total = (self.precio_base * float(horas)) - descuento
+        if total < 0: raise ErrorFinanciero("El descuento excede el costo")
+        return self.aplicar_impuestos(total) if aplicar_impuesto else total
 
-    def mostrar_detalle(self):  # Implementación del metodo abstracto.
-        return f"[SERVICIO] Sala: {self.nombre} | Tarifa: ${self.precio_base}/hr"
-class AlquilerEquipos(Servicio):  # Subclase para alquiler de equipos.
-    def calcular_costo(self, dias, incluye_seguro=False): # Metodo para calcular costos.
-        if not isinstance(dias, (int, float)) or dias <= 0: # Valida los dias para evitar errores. 
-            raise DatosInvalidosError(f"Días inválidos: {dias}") # Muestra el mensaje de Error. 
+    def mostrar_detalle(self): return f" SALA: {self.nombre} (${self.precio_base}/h)"
+    def validar_datos(self): return self.precio_base > 0
         
-        recargo = 1.15 if incluye_seguro else 1.0  # Calcula recargo por seguro.
-        return (self.precio_base * dias) * recargo  # Retorna costo total.
+class AlquilerEquipos(Servicio): # Subclase para alquiler de equipos.
+    def calcular_costo(self, dias, incluye_seguro=False):# Metodo para calcular costos.
+        costo = self.precio_base * float(dias)  # V
+        if incluye_seguro: costo *= 1.15
+        return costo
+    def mostrar_detalle(self): return f" EQUIPO: {self.nombre} (${self.precio_base}/día)"
+    def validar_datos(self): return self.precio_base > 0
 
-    def mostrar_detalle(self):  # Implementación del metodo abstracto.
-        return f"[SERVICIO] Equipo: {self.nombre} | Tarifa: ${self.precio_base}/día"
-class AsesoriaEspecializada(Servicio):  # Subclase para asesorias especializadas. 
-    def calcular_costo(self, sesiones, tipo_cliente="ESTANDAR"): # Metodo para calcular costos.
-        if not isinstance(sesiones, (int, float)) or sesiones <= 0: # Valida sesiones.
-            raise DatosInvalidosError(f"Sesiones inválidas: {sesiones}") # Muestra el mensaje de error. 
-        
-        descuento = 0.85 if tipo_cliente.upper() == "PREMIUM" else 1.0 # Aplica descuento
-        return (self.precio_base * sesiones) * descuento # Calcula y retorna el costo total aplicando el descuento por sesiones.
+class AsesoriaEspecializada(Servicio):
+    def calcular_costo(self, sesiones, tipo="ESTANDAR"):
+        costo = self.precio_base * int(sesiones)
+        if str(tipo).upper() == "PREMIUM": costo *= 0.85
+        return costo
 
-    def mostrar_detalle(self):  # Implementacion del metodo abstracto.
-        return f"[SERVICIO] Asesoría: {self.nombre} | Tarifa: ${self.precio_base}/sesión"
+    def mostrar_detalle(self): return f" ASESORÍA: {self.nombre} (${self.precio_base} base)" 
+    def validar_datos(self): return self.precio_base > 0   
+
     # CREACION DE LA CLASE CLIENTE (Encapsulacion y Validaciones) 
 class Cliente(EntidadSistema):  # Clase Cliente.
     def __init__(self, nombre, correo):  # Nombre y correo del cliente. 
