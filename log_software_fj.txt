@@ -1,0 +1,13 @@
+[2026-05-12 13:45:41] [ERROR] Reserva 1778611541715 - ErrorFinanciero: Fallo en el calculo financiero interno
+[2026-05-12 13:45:41] [Informacion incorrecta]  Motivos por el cual : 'ReservaSala' object has no attribute 'aplicar_impuestos'
+[2026-05-12 13:45:41] [Informacion] Intento de procesamiento ID 1778611541715 finalizado.
+[2026-05-12 13:45:41] [ERROR] Reserva 1778611541717 - ErrorFinanciero: Fallo en el calculo financiero interno
+[2026-05-12 13:45:41] [Informacion incorrecta]  Motivos por el cual : El descuento excede el costo
+[2026-05-12 13:45:41] [Informacion] Intento de procesamiento ID 1778611541717 finalizado.
+[2026-05-12 13:45:41] [Informacion] Reserva Confirmada ID 1778611541718
+[2026-05-12 13:45:41] [Informacion] Intento de procesamiento ID 1778611541718 finalizado.
+[2026-05-12 13:45:41] [Informacion] Reserva Confirmada ID 1778611541719
+[2026-05-12 13:45:41] [Informacion] Intento de procesamiento ID 1778611541719 finalizado.
+[2026-05-12 13:45:41] [Informacion] Reserva Confirmada ID 1778611541720
+[2026-05-12 13:45:41] [Informacion] Intento de procesamiento ID 1778611541720 finalizado.
+[2026-05-12 13:45:41] [Informacion] Reserva 1778611541718 Cancelada por el usuario.

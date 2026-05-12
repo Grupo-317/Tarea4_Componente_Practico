@@ -23,8 +23,9 @@ class ServicioNoDisponibleError(ErrorSistemaFJ): # Excepcion para servicios inac
 class ErrorFinanciero(ErrorSistemaFJ): # Excepcion para errores de cálculos.
     """ Indica inconsistencias en cálculos de costos o descuentos"""
     pass
-class ErrorClienteNoEncontrados(ErrorSistemaFJ): # Excepcion para errores donde no se encuentre un registro de un cliente.
+class ErrorClienteNoEncontrado(ErrorSistemaFJ): # Excepcion para errores donde no se encuentre un registro de un cliente.
     """ Indica cuando un cliente no se encuentra registrado en el sistema"""
+    pass
 # CREACION DEL SISTEMA DE LOGS
 class LoggerSistema: # Creacion de la clase para el sistema. 
     @staticmethod
@@ -42,7 +43,7 @@ class LoggerSistema: # Creacion de la clase para el sistema.
         LoggerSistema.registrar_evento(mensaje, "ERROR") # Muestra y  guarda el mensaje de error detectado.
         # El encadenamiento de excepciones se captura aquí si existe
         if excepcion.__cause__:
-            LoggerSistema.registrar_evento(f" Motivos por el cual : {excepcion.__cause__}", "Informacion incorrecta") # Muestra mensajes. 
+            LoggerSistema.registrar_evento(f" Causas : {excepcion.__cause__}", "Error") # Muestra mensajes. 
     pass
 #  CREACION DE LA CLASE ABSTRACTA
 class EntidadSistema(ABC):# Clase abstracta para entidades del sistema.
@@ -107,7 +108,7 @@ class ReservaSala(Servicio):  # Subclase para reserva de salas.
         if float(horas) <= 0: raise DatosInvalidosError("Las horas deben ser positivas") # Valida que no se ingresen horas negativas o cero
         total = (self.precio_base * float(horas)) - descuento # Calcula: Precio por hora * cantidad de horas y le resta el descuento. 
         if total < 0: raise ErrorFinanciero("El descuento excede el costo") # Mensaje de error 
-        return self.aplicar_impuestos(total) if aplicar_impuesto else total
+        return self.aplicar_impuesto(total) if aplicar_impuesto else total
          
     def mostrar_detalle(self): return f" SALA: {self.nombre} (${self.precio_base}/h)" # Muestra el nombre de la sala y cuánto cuesta cada hora
     def validar_datos(self): return self.precio_base > 0 # Revisa que el precio de la sala sea mayor a cero para ser valido
@@ -193,13 +194,19 @@ class SistemaFJ:
         print(f" Cliente {nombre} registrado exitosamente.") # mensaje cuando el registro es valido
         # Une a un Cliente con un Servicio para generar una transacción final.
     def crear_reserva(self, correo_cli, id_serv, cantidad, **params):
-        if correo_cli not in self.clientes: raise  ErrorClienteNoEncontrados("Cliente no registrado") # Mensaje cuando el cliente no se encuentra registrado.
-        if id_serv not in self.servicios: raise ServicioNoDisponibleError("El código de servicio no existe")  # Mensaje cuando el codigo del servicio no existe.
+        if correo_cli not in self.clientes:
+            raise  ErrorClienteNoEncontrado("Cliente no registrado") # Mensaje cuando el cliente no se encuentra registrado.
+        if id_serv not in self.servicios:
+            raise ServicioNoDisponibleError("El codigo de servicio no existe")  # Mensaje cuando el codigo del servicio no existe.
         
         reserva = Reserva(self.clientes[correo_cli], self.servicios[id_serv], cantidad, **params) # Se crea el objeto Reserva uniendo los datos del cliente y el servicio
-        resultado = reserva.procesar() # Se llama al método que calcula costos, IVA y valida disponibilidad
-        self.reservas_globales.append(reserva) # Se guarda la reserva en el historial global para reportes futuros
-        print(resultado) # Muestra el recibo final o el error capturado
+        try: 
+            resultado = reserva.procesar() # Se llama al método que calcula costos, IVA y valida disponibilidad
+            self.reservas_globales.append(reserva) # Se guarda la reserva en el historial global para reportes futuros
+            print(resultado) # Muestra el recibo final o el error capturado
+        except Exception as e :
+            LoggerSistema.registrar_error (e, "crear_reserva")
+            print( f" No se puede craer la reserva: {e}")
 
     def ejecutar_simulacion_10_ops(self):
         print("\n" + "="*20 + " INICIANDO SIMULACIÓN " + "="*20)
@@ -231,131 +238,65 @@ class SistemaFJ:
         else: raise DatosInvalidosError("Tipo de servicio no reconocido")  # Mensaje de error.
         self.servicios[cod] = nuevo
         print(f" Servicio '{nombre}' guardado con código {cod}.")    # Confirma el registro del servicio 
-
-
-
-    # CREACION DE LA CLASE CLIENTE (Encapsulacion y Validaciones) 
-class Cliente(EntidadSistema):  # Clase Cliente.
-    def __init__(self, nombre, correo):  # Nombre y correo del cliente. 
-        super().__init__()  # Llama al constructor base.
-        self.nombre = nombre  # Usa el setter para validar si la informacion es correcta.
-        self.correo = correo  # Usa el setter para validar si la informacion ingresada es correcta. 
-
-    @property  # Define getter para nombre.
-    def nombre(self): return self.__nombre  # Retorna atributo privado.
-
-    @nombre.setter  # Define setter para nombre.
-    def nombre(self, valor):  # Valida nombre.
-        if not valor or len(valor) < 3:  # Verifica longitud minima.
-            raise DatosInvalidosError(" El nombre debe tener al menos 3 caracteres.")
-        self.__nombre = valor  # Asigna valor si es correcto.
-
-    @property  # Define getter para correo
-    def correo(self): return self.__correo  # Retorna atributo privado.
-
-    @correo.setter  # Define setter para correo.
-    def correo(self, valor):  # Valida correo.
-        if "@" not in valor or "." not in valor:  # Verifica formato.
-            raise DatosInvalidosError(f"Formato '{valor}' es incorrecto.")
-        self.__correo = valor  # Asigna valor si es correcto.
-
-    def mostrar_detalle(self):  # Implementacion del metodo abstracto.
-        return f"[CLIENTE] {self.nombre} ({self.correo})"
-# CREACION DE LA CLASE RESERVA (Gestion y Excepciones)
-class Reserva(EntidadSistema):  # Define la subclase Reserva que hereda de EntidadSistema.
-    def __init__(self, cliente, servicio, cantidad, **params): # Prepara los datos necesarios para registrar una nueva reserva.
-        super().__init__()  # Constructor base
-        if not isinstance(cliente, Cliente) or not isinstance(servicio, Servicio):
-            raise DatosInvalidosError(" Error. Ingrese los datos de manera correcta, por favor.") # Mensaje de error 
+    # CREACION DE LA  INTERFAZ DE USUARIO (MENÚ) 
+def menu():
+    sistema = SistemaFJ()
+    while True:
+        print("\n" + "—"*15 + " SOFTWARE FJ - SISTEMA INTEGRAL " + "—"*15)
+        print("1. [Cliente nuevo]      2. [ Nuevos Servicios]    3. [ Listar Servicios]")
+        print("4. [ Crear Reserva]     5. [ Listar Reserva]      6. [ Canselar Reserva] ")
+        print("7. [Ver historial]      8.  [Ejecutar Test Automatico]")
+        print("9. [Salir]")
         
-        self.cliente = cliente  # 
-        self.servicio = servicio  # registra la informacion de las compras que hace el cliente.
-        self.cantidad = cantidad  # Registra la informacion del producto en el momento de su compra:Hora,dia o sesiones.
-        self.params = params  # Registra otro tipo de informacion dada por el cliente.
-        self.estado = "Registrada"  # Marca el inicio de la reserva en el sistema.
-    def procesar(self):  # Mostrar en pantalla que servicio se esta atendiendo 
-        print(f"Procesando la informacion: {self.servicio.nombre} de {self.cliente.nombre}...")
-        try:  # Bloque para manejo de errores
-            if self.estado == "PROCESADA":  # Valida si la reserva se completo de manera correcta.
-                raise ServicioNoDisponibleError("Error, esta informacion ya fue procesada.") # Mensaje de error. 
-
-            total = self.servicio.calcular_costo(self.cantidad, **self.params) # Ejecuta polimorfismo.
-            self.estado = "PROCESADA"  # Marca como éxito.
-            return f"Felicidades su informacion es correcta: Total a pagar: ${total:,.2f}" # Mensaje cuando la informacion se ingresa de manera correcta.
-
-        except (DatosInvalidosError, ErrorFinanciero) as e: # Captura errores de negocio.
-            self.estado = "Error informacion incorrecta"  # Mensaje de error cuando la informacion  es invalida.
-            raise ErrorSistemaFJ(f"Error, datos ingresados de forma invalida: {e}") from e # Mensaje de  error.
-        
-        except Exception as e:  # Captura otros errores.
-            self.estado = "Error en el sistema"  # Actualiza estado a error a travez de este mensaje.
-            raise ErrorSistemaFJ(f"Error, se evidencia fallas en el sistema : {e}") from e # Mensaje de error.
-        
-        finally:  # Bloque que siempre se ejecuta al final.
-            print(f"Estado final: {self.estado}") # Se evidencia un mensaje de  resultado final.
-
-    def mostrar_detalle(self):  # Implementacion  del metodo abstracto.
-        return f"[RESERVA] Cliente: {self.cliente.nombre} | Estado: {self.estado}"
-def registrar_log(mensaje, nivel="Sistema"):  # Función para registrar log.
-    try:  # Intenta abrir el archivo.
-        with open("log_software_fj.txt", "a", encoding="utf-8") as f:
-            ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") # Formato de la fecha.
-            f.write(f"[{ts}] [{nivel}] {mensaje}\n") # Escribe el registro.
-    except IOError as e: 
-        print(f" Error, No se pudo escribir en log: {e}") # Mensaje de error si no hay acceso al archivo.
-    # SIMULACIÓN De LAS 10 OPERACIONES
-def ejecutar_sistema():# Funcion principal para que se ejecute todo el sistema.
-    print(""+"="*60)
-    print("Sistema Integral De Gestion De La Empresa Sotware FJ\n") # Titulo del sistema.
-    print("="*60)
-    
-    
-    # Crear servicios
-    s1 = ReservaSala(" Sala principal", 150000)  # Nombre del servicio y su precio. 
-    s2 = AlquilerEquipos(" Laptop 5.ª Gen", 45000) # Nombre del servicio y su precio.
-    s3 = AsesoriaEspecializada("Sistemas Operativos", 80000)# Nombre del servicio y su precio.
-    # Crear clientes válidos, identificando error si se ingresa de manera correcta.
-    try:
-        c1 = Cliente("Gertrudiz Carvajal Cuchimba", "gertrudiz@unad.edu.co")# Nombre y correo del cliente 1.
-        c2 = Cliente("Maria Gomez", "maria@gmail.com")# Nombre y correo del cliente 2.
-    except ErrorSistemaFJ as e:# Atrapa errores de datos ingresados por el cliente.
-        print(f"Error: la informacion ingresada no es valida: {e}") # Mensaje de error.
-        return
-    # Definir 10 operaciones entre correctas e incorretas
-    operaciones = [
-        lambda: Reserva(c1, s1, 3, aplicar_impuesto=True).procesar(), # Operacion  correcto
-        lambda: Reserva(c1, s1, 1, descuento=150000).procesar(),      # Operacion incorrecto
-        lambda: Reserva(c2, s2, 2, incluye_seguro=True).procesar(),   # Operacion correcto
-        lambda: Reserva(c1, s2, -1).procesar(),                       # Operacion incorrecto 
-        lambda: Reserva(c1, s3, 5, tipo_cliente="PREMIUM").procesar(),# Operacion correcto
-        lambda: Reserva(c2, s1, "seis horas").procesar(),             # Operacion incorrecto
-        lambda: Reserva(c2, s2, 1, incluye_seguro=False).procesar(),  # Operacion correcto
-        lambda: Reserva(c1, s1, 9, descuento=30000).procesar(),       # Operacion correcto
-        lambda: Cliente("PA", "error@test.com"),                      # Operacion incorrecto
-        lambda: Cliente("Pedro", " correo invalido"),                 # Operacion incorrecto
-    ]
-    for i, op in enumerate(operaciones, 1): 
-        print(f"\n ||  EJECUTANDO OPERACION #{i}||") # Se evidencia un mensaje con la palabra "EJECUTANDO OPERACION" de numero  1 al 10.
+        op = input("\nSeleccione una opcion: ")
         try:
-            resultado = op() # Se ejecuta las 10 operaciones con la funcion Lambda.
-            if resultado:  # Evidencia si hay un resultado exitoso.
-                print(resultado) # Muestra el total a pagar. 
-                registrar_log(f"Operacion {i}: {resultado}") # Guarda en registra_log.
+            if op == "1":
+                sistema.registrar_cliente(input("Nombre completo: "), input("Correo electronico: "))
+            elif op == "2":
+                print("Tipos: 1.Sala | 2.Equipo | 3.Asesoría")
+                sistema.registrar_servicio(input("Tipo: "), input("Código (ej. S5): "), 
+                                         input("Nombre: "), float(input("Precio base: ")))
+            elif op == "3":
+                print("\nCATÁLOGO DE SERVICIOS:")
+                for k, v in sistema.servicios.items(): print(f"[{k}] {v.mostrar_detalle()}")
+            elif op == "4":
+                correo = input("Correo del cliente: ")
+                id_s = input("Código del servicio: ").upper()
+                cant = float(input("Cantidad (horas/días/sesiones): "))
+                sistema.crear_reserva(correo, id_s, cant)
+            elif op == "5":
+                print("\nHISTORIAL DE RESERVAS:")
+                for r in sistema.reservas_globales: print(r.mostrar_detalle())
+            elif op == "6":
+                # Cancelar la última reserva como ejemplo o pedir ID
+                if not sistema.reservas_globales:
+                    print("No hay reservas para cancelar.")
+                else:
+                    idx = int(input(f"Ingrese índice de reserva (0 a {len(sistema.reservas_globales)-1}): "))
+                    print(sistema.reservas_globales[idx].cancelar())
+            elif op == "7":
+                try:
+                    with open("log_software_fj.txt", "r", encoding="utf-8") as f:
+                        print("\n" + "—"*10 + " CONTENIDO DEL LOG " + "—"*10)
+                        print(f.read())
+                except FileNotFoundError: print("El archivo de log aún no se ha creado.")
+            elif op == "8":
+                sistema.ejecutar_simulacion_10_ops()
+            elif op == "9":
+                print("Cerrando sistema ¡Adios!")
+                break
             else:
-                # Caso de creación de clientes exitosa (aunque en la lista fallan)
-                print("Proceso exitoso") # Muestra mensaje si es correcto.
-        except ErrorSistemaFJ as e: # Captura los errores.
-            mensaje = f"Excepcion controlada: {e}" # Muestra mensaje si es correcto.
-            print(mensaje)
-            registrar_log(mensaje, "ERROR") # Muestra mensaje si es incorrecto.
+                print(" Opcion no valida, intente nuevamente.")
+        except ValueError:
+            mensage = "Error de entrada: Se esperaba un número y se recibió texto."
+            print(f" {mensage}")
+            LoggerSistema.registrar_evento(mensage, "ERROR")
         except Exception as e:
-            mensaje = f"Error: en el sistema: {e}"# Muestra mensaje si es incorrecto.
-            print(mensaje)
-            registrar_log(mensaje, " Emergencia") # Muestra mensaje si es incorrecto.
-
-    print("\n" + "="*50)
-    print("SISTEMA FINALIZADO. Revise 'log_software_FJ.txt'.") # Muestra mensaje de cierre del sistema.
-    print("="*50)
+            print(f"Error inesperado: {e}")
+            LoggerSistema.registrar_error(e, "Interfaz_Usuario")
 
 if __name__ == "__main__":
-    ejecutar_sistema()  # Llama a la función principal                 
+    menu()
+
+
+    
