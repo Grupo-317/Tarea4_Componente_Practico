@@ -170,9 +170,67 @@ class Reserva(EntidadSistema):# Define la subcase reserva que hereda de EntidadS
         return f" Reserva #{self._id} ha sido cancelada."
 
     def mostrar_detalle(self):# Crea un resumen visual de la factura o recibo 
-        return f"📅 Reserva #{self._id} | {self.servicio.nombre} | Estado: {self.estado} | Total: ${self.costo_total:,.2f}"
+        return f" Reserva #{self._id} | {self.servicio.nombre} | Estado: {self.estado} | Total: ${self.costo_total:,.2f}"
     
-    def validar_datos(self): return self.cliente and self.servicio # Verifica que la reserva tenga un cliente y un servicio asignados para ser correcta.  
+    def validar_datos(self): return self.cliente and self.servicio # Verifica que la reserva tenga un cliente y un servicio asignados para ser correcta. 
+#    CREACION DEL SISTEMA DE GESTION
+class SistemaFJ:
+    def __init__(self):
+        self.clientes = {} # Diccionario para buscar clientes rapido por su correo.
+        self.servicios = {} # Diccionario para buscar servicios por su codigo.
+        self.reservas_globales = [] # Lista que guarda el historial de todas las ventas
+        self._precargar_datos() # Ejecuta la carga de servicios de prueba automáticamente
+
+    def _precargar_datos(self):
+        self.servicios["S1"] = ReservaSala("Sala de Juntas", 50000)  # Nombre del servicio y su costo
+        self.servicios["S2"] = AlquilerEquipos("Laptop Pro", 35000) # Nombre del servicio y su costo
+        self.servicios["S3"] = AsesoriaEspecializada("Consultoría Python ", 120000) # Nombre del servicio y su costo
+      #  Crea un nuevo cliente y lo guarda en el sistema. Verifica que el correo no esté repetido para evitar errores.
+    def registrar_cliente(self, nombre, correo): # Registar nombre y correo del cliente.
+        if correo in self.clientes: raise DatosInvalidosError("El correo ya existe") # Mensaje de error
+        nuevo = Cliente(nombre, correo)
+        self.clientes[correo] = nuevo  # Guarda al cliente usando el correo.
+        print(f" Cliente {nombre} registrado exitosamente.") # mensaje cuando el registro es valido
+        # Une a un Cliente con un Servicio para generar una transacción final.
+    def crear_reserva(self, correo_cli, id_serv, cantidad, **params):
+        if correo_cli not in self.clientes: raise  ErrorClienteNoEncontrados("Cliente no registrado") # Mensaje cuando el cliente no se encuentra registrado.
+        if id_serv not in self.servicios: raise ServicioNoDisponibleError("El código de servicio no existe")  # Mensaje cuando el codigo del servicio no existe.
+        
+        reserva = Reserva(self.clientes[correo_cli], self.servicios[id_serv], cantidad, **params) # Se crea el objeto Reserva uniendo los datos del cliente y el servicio
+        resultado = reserva.procesar() # Se llama al método que calcula costos, IVA y valida disponibilidad
+        self.reservas_globales.append(reserva) # Se guarda la reserva en el historial global para reportes futuros
+        print(resultado) # Muestra el recibo final o el error capturado
+
+    def ejecutar_simulacion_10_ops(self):
+        print("\n" + "="*20 + " INICIANDO SIMULACIÓN " + "="*20)
+        ops = [
+            ("1. Registro Cliente OK", lambda: self.registrar_cliente("Mateo Ruiz", "mateo@dev.com")), # Prueba registro exitoso.
+            ("2. Registro Cliente Error", lambda: self.registrar_cliente("A", "error-mail")), # Prueba validacion de nombre corto o correo.
+            ("3. Creación Servicio OK", lambda: self.registrar_servicio("1", "S10", "Auditorio", 200000)),# Prueba creacion de servicio.
+            ("4. Reserva OK (Sala)", lambda: self.crear_reserva("mateo@dev.com", "S1", 4, aplicar_impuesto=True)),# Prueba venta con IVA.
+            ("5. Reserva Error (Financiero)", lambda: self.crear_reserva("mateo@dev.com", "S1", 2, descuento=500000)),# Prueba descuento excesivo.
+            ("6. Reserva OK (Equipo)", lambda: self.crear_reserva("mateo@dev.com", "S2", 3, incluye_seguro=True)),# Prueba venta con seguro.
+            ("7. Reserva Error (Dato Inv)", lambda: self.crear_reserva("mateo@dev.com", "S2", -10)),# Prueba validacion de cantidad negativa.
+            ("8. Reserva OK (Asesoría)", lambda: self.crear_reserva("mateo@dev.com", "S3", 2, tipo="PREMIUM")),# Prueba tarifa especial.
+            ("9. Error (Cliente No Existe)", lambda: self.crear_reserva("desconocido@mail.com", "S1", 1)),# Prueba busqueda de cliente fallida.
+            ("10. Cancelación Operativa", lambda: print(self.reservas_globales[0].cancelar() if self.reservas_globales else "No hay reservas")) # Prueba anulacion.
+        ]
+        # BUCLE DE PRUEBAS: Ejecuta cada operacion
+        for desc, func in ops: # Itera sobre la lista 'ops' obteniendo descripcion y la funcion lambda.
+            try:
+                print(f"\n {desc}:") # Imprime el nombre del escenario actua.
+                func() # Ejecuta la logica de la prueba.
+            except Exception as e: # Captura cualquier error.
+                print(f" Error Capturado: {e}") # Mensaje de error.
+        print("\n" + "="*60)    
+    def registrar_servicio(self, tipo, codigo, nombre, precio):
+        cod = codigo.upper() # Convierte el codigo a mayusculas para estandarizar.
+        if tipo == "1": nuevo = ReservaSala(nombre, precio) # Instancia objeto para reserva de salas.
+        elif tipo == "2": nuevo = AlquilerEquipos(nombre, precio) # Instancia objeto para equipos.
+        elif tipo == "3": nuevo = AsesoriaEspecializada(nombre, precio) # Instancia objeto para asesorias.
+        else: raise DatosInvalidosError("Tipo de servicio no reconocido")  # Mensaje de error.
+        self.servicios[cod] = nuevo
+        print(f" Servicio '{nombre}' guardado con código {cod}.")    # Confirma el registro del servicio 
 
 
 
