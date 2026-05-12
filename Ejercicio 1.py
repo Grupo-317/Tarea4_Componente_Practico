@@ -6,6 +6,7 @@
 
 import datetime
 from abc import ABC, abstractmethod
+import traceback
 
 # GESTIÓN DE ERRORES ESPECÍFICOS 
 class ErrorSistemaFJ(Exception): # Define la clase base para errores del sistema.
@@ -21,6 +22,27 @@ class ServicioNoDisponibleError(ErrorSistemaFJ): # Excepcion para servicios inac
 
 class ErrorFinanciero(ErrorSistemaFJ): # Excepcion para errores de cálculos.
     """ Indica inconsistencias en cálculos de costos o descuentos"""
+    pass
+class ErrorClienteNoEncontrados(ErrorSistemaFJ): # Excepcion para errores donde no se encuentre un registro de un cliente.
+    """ Indica cuando un cliente no se encuentra registrado en el sistema"""
+# CREACION DEL SISTEMA DE LOGS
+class LoggerSistema: # Creacion de la clase para el sistema. 
+    @staticmethod
+    def registrar_evento(mensaje, nivel="Informacion"):# Define como recibir el mensaje y su etiqueta de importancia.
+        try:
+            with open("log_software_fj.txt", "a", encoding="utf-8") as archivo: # # Abre el archivo para escibir el mensaje.
+                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") # Crea la marca de tiempo actual.
+                archivo.write(f"[{timestamp}] [{nivel}] {mensaje}\n") # Escribe la línea final en el archivo.
+        except IOError as e:
+            print(f" Error: No se puede acceder al archivo de registro {e}")   # Muestra mensaje de error.
+
+    @staticmethod
+    def registrar_error(excepcion, contexto=""): # Muestra y guarda el mensaje de error.
+        mensaje = f"{contexto} - {type(excepcion).__name__}: {str(excepcion)}" # Muestra de mensaje de error detectado.
+        LoggerSistema.registrar_evento(mensaje, "ERROR") # Muestra y  guarda el mensaje de error detectado.
+        # El encadenamiento de excepciones se captura aquí si existe
+        if excepcion.__cause__:
+            LoggerSistema.registrar_evento(f" Motivos por el cual : {excepcion.__cause__}", "Informacion incorrecta") # Muestra mensajes. 
     pass
 #  CREACION DE LA CLASE ABSTRACTA
 class EntidadSistema(ABC):# Clase abstracta para entidades del sistema.
