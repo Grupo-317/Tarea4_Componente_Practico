@@ -129,6 +129,53 @@ class AsesoriaEspecializada(Servicio): # Subclase para asesoria especialisadas.
     def mostrar_detalle(self): return f" ASESORÍA: {self.nombre} (${self.precio_base} base)" # Muestra el tipo de asesoría y su precio base
     def validar_datos(self): return self.precio_base > 0   # Verifica que la asesoría tenga un precio definido
 
+class Reserva(EntidadSistema):# Define la subcase reserva que hereda de EntidadSistema.
+    def __init__(self, cliente, servicio, cantidad, **params):# prepara los datos necesario para registrar una nueva reserva.
+        super().__init__() # Constructor base
+        self.cliente = cliente  #Guarda el objeto Cliente que está haciendo la compra.
+        self.servicio = servicio # registra la informacion de las compras que hace el cliente.
+        self.cantidad = cantidad  # Registra la informacion del producto en el momento de su compra:Hora,dia o sesiones.
+        self.params = params  # Registra otro tipo de informacion dada por el cliente.
+        self.estado = "PENDIENTE" # Define que la reserva inicia en espera hasta que se procese el pago.
+        self.costo_total = 0 # Inicializa el contador de dinero en cero antes de realizar el cálculo.
+
+    def procesar(self): # Este método intenta completar la compra y calcular el dinero total.
+        try:
+            if not self.servicio.disponible:
+                raise ServicioNoDisponibleError("Servicio no disponible") # Mensaje de error
+            
+            try:
+                self.costo_total = self.servicio.calcular_costo(self.cantidad, **self.params)  #Intenta completar la compra y calcular el dinero total.
+            except Exception as e:
+                # Encadenamiento de excepciones solicitado
+                raise ErrorFinanciero("Fallo en el calculo financiero interno") from e  # Mensaje de error
+                # Si ocurre cualquier error conocido durante el proceso   
+        except (ServicioNoDisponibleError, ErrorFinanciero, DatosInvalidosError) as e:
+            self.estado = "ERROR" # Cambia el estado para saber que algo salio mal.
+            LoggerSistema.registrar_error(e, f"Reserva {self._id}") # Guarda el error
+            raise ErrorSistemaFJ(f"No se pudo completar la reserva: {e}")  # Mensaje de error
+        else:
+            self.estado = "CONFIRMADA" # Marca la reserva como exitosa.
+            self.cliente.reservas.append(self) # Guarda esta reserva.
+            LoggerSistema.registrar_evento(f"Reserva Confirmada ID {self._id}") # Registra el éxito
+            return f" Confirmada. Total: ${self.costo_total:,.2f}" # Muestra el precio final con 2 decimales
+        finally:
+            LoggerSistema.registrar_evento(f"Intento de procesamiento ID {self._id} finalizado.")
+
+    def cancelar(self): # Metodo para anular una reserva que ya existe.
+        if self.estado == "CANCELADA":
+            return "La reserva ya estaba cancelada." # Mensaje de que la reserva ya esta cancelada.
+        self.estado = "CANCELADA" # Cambia el estado a cancelado.
+        LoggerSistema.registrar_evento(f"Reserva {self._id} Cancelada por el usuario.")
+        return f" Reserva #{self._id} ha sido cancelada."
+
+    def mostrar_detalle(self):# Crea un resumen visual de la factura o recibo 
+        return f"📅 Reserva #{self._id} | {self.servicio.nombre} | Estado: {self.estado} | Total: ${self.costo_total:,.2f}"
+    
+    def validar_datos(self): return self.cliente and self.servicio # Verifica que la reserva tenga un cliente y un servicio asignados para ser correcta.  
+
+
+
     # CREACION DE LA CLASE CLIENTE (Encapsulacion y Validaciones) 
 class Cliente(EntidadSistema):  # Clase Cliente.
     def __init__(self, nombre, correo):  # Nombre y correo del cliente. 
@@ -163,7 +210,7 @@ class Reserva(EntidadSistema):  # Define la subclase Reserva que hereda de Entid
         if not isinstance(cliente, Cliente) or not isinstance(servicio, Servicio):
             raise DatosInvalidosError(" Error. Ingrese los datos de manera correcta, por favor.") # Mensaje de error 
         
-        self.cliente = cliente  # Registra la informacion del cliente que hace la reserva.
+        self.cliente = cliente  # 
         self.servicio = servicio  # registra la informacion de las compras que hace el cliente.
         self.cantidad = cantidad  # Registra la informacion del producto en el momento de su compra:Hora,dia o sesiones.
         self.params = params  # Registra otro tipo de informacion dada por el cliente.
