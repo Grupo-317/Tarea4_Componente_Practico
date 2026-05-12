@@ -46,12 +46,15 @@ class LoggerSistema: # Creacion de la clase para el sistema.
     pass
 #  CREACION DE LA CLASE ABSTRACTA
 class EntidadSistema(ABC):# Clase abstracta para entidades del sistema.
-    def __init__(self):# Inicializador que marca la fecha de creacion.
-        self.fecha_registro = datetime.datetime.now() # Guarda la fecha actual.
-
-    @abstractmethod # Define un metodo que obliga a las subclases a implementarlo.
+    def __init__(self):# Inicializador que marca la fecha de creacion
+        self.fecha_registro = datetime.datetime.now()
+        self._id = int(datetime.datetime.now().timestamp() * 1000)        
+    @abstractmethod  # Define un metodo que obliga a las subclases a implementarlo.
     def mostrar_detalle(self): # Metodo abstracto para mostrar información o detalle.
         """ Garantiza la salida de información de cada subclase de manera correcta"""
+        pass
+    @abstractmethod
+    def validar_datos(self): 
         pass
     # CREACION DE LA CLASE ABSTRACTA SERVICIOS 
 class Servicio(EntidadSistema, ABC):  # Clase base para todos los servicios.
@@ -59,14 +62,46 @@ class Servicio(EntidadSistema, ABC):  # Clase base para todos los servicios.
         super().__init__()  # Llama al constructor de la clase base.
         self.nombre = nombre  # Define el nombre del servicio.
         self.precio_base = precio_base  # Define el precio base del servicio.
-
+        self.disponible = True
     @abstractmethod  # Método abstracto de cálculo de costos.
     def calcular_costo(self, *args, **kwargs):  # Firma para calculos especificos.
         pass
 
-    def aplicar_iva(self, base, iva=0.19):  # Metodo para aplicar impuestos.
+    def aplicar_impuesto(self, base, iva=0.19):  # Metodo para aplicar impuestos.
         """Método para simular sobrecarga y cálculos base."""
         return base * (1 + iva)  # Retorna el valor con impuesto.
+#    CREACION DE LA CLASE CLIENTE "ENCAPSULAMIENTO"
+class Cliente(EntidadSistema): # Creamos la clase Cliente
+    def __init__(self, nombre, correo, telefono=""):
+        super().__init__()
+        self.nombre = nombre  # Guarda el nombre
+        self.correo = correo   # Guarda el correo
+        self.telefono = telefono  # Guarda el telefono
+        self.reservas = [] 
+
+    @property
+    def nombre(self): return self.__nombre # Muestra el nombre
+
+    @nombre.setter
+    def nombre(self, valor):
+        if not valor or len(valor.strip()) < 3: # Se evidencia cual es la condicion, para que el dato ingresado sea valido.
+            raise DatosInvalidosError(" Ingrese el nombre correctamente, minimo  tres carateres") # Muestra un mensaje de error.
+        self.__nombre = valor.strip()
+
+    @property
+    def correo(self): return self.__correo # Muestra el correo
+
+    @correo.setter
+    def correo(self, valor):
+        if "@" not in valor or "." not in valor: # Revisa que el correo tenga un '@' y un '.' para que sea valido
+            raise DatosInvalidosError(f"Email incorrecto: {valor}") # Muestra un mensaje de error.
+        self.__correo = valor
+
+    def validar_datos(self): 
+        return len(self.__nombre) > 0 and "@" in self.__correo #  devuelve 'True' si el nombre  y el correo son correctos.
+        
+    def mostrar_detalle(self):
+        return f"Cliente: {self.nombre} | Email: {self.correo}"    # Muestra en pantalla cliente: nombre y correo.       
 class ReservaSala(Servicio):  # Subclase para reserva de salas.
     def calcular_costo(self, horas, descuento=0, aplicar_impuesto=False):
         if not isinstance(horas, (int, float)) or horas <= 0:  # Valida tipo y valor.
