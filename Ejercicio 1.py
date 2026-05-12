@@ -241,60 +241,61 @@ class SistemaFJ:
     # CREACION DE LA  INTERFAZ DE USUARIO (MENÚ) 
 def menu():
     sistema = SistemaFJ()
-    while True:
+    while True:# Imprime el encabezado y las opciones disponibles
         print("\n" + "—"*15 + " SOFTWARE FJ - SISTEMA INTEGRAL " + "—"*15)
         print("1. [Cliente nuevo]      2. [ Nuevos Servicios]    3. [ Listar Servicios]")
         print("4. [ Crear Reserva]     5. [ Listar Reserva]      6. [ Canselar Reserva] ")
         print("7. [Ver historial]      8.  [Ejecutar Test Automatico]")
         print("9. [Salir]")
         
-        op = input("\nSeleccione una opcion: ")
+        op = input("\nSeleccione una opcion: ")# Solicita la opcion al usuario.
         try:
-            if op == "1":
-                sistema.registrar_cliente(input("Nombre completo: "), input("Correo electronico: "))
-            elif op == "2":
-                print("Tipos: 1.Sala | 2.Equipo | 3.Asesoría")
-                sistema.registrar_servicio(input("Tipo: "), input("Código (ej. S5): "), 
-                                         input("Nombre: "), float(input("Precio base: ")))
-            elif op == "3":
-                print("\nCATÁLOGO DE SERVICIOS:")
-                for k, v in sistema.servicios.items(): print(f"[{k}] {v.mostrar_detalle()}")
-            elif op == "4":
-                correo = input("Correo del cliente: ")
-                id_s = input("Código del servicio: ").upper()
-                cant = float(input("Cantidad (horas/días/sesiones): "))
+            if op == "1": # OPCION 1: REGISTRAR NUEVO CLIENTE
+            
+                sistema.registrar_cliente(input("Nombre completo: "), input("Correo electronico: ")) # Solicita nombre y correo, luego registra al cliente en el sistema.
+            elif op == "2": # OPCION 2: REGISTRAR NUEVO SERVICIO
+                print("Tipos: 1.Sala | 2.Equipo | 3.Asesoría")  # Muestra los tipos de servicios disponibles.
+                sistema.registrar_servicio(input("Tipo: "), input("Código (ej. S5): "),input("Nombre: "), float(input("Precio base: ")))  # Registra un nuevo servicio con sus caracteristicas.
+            elif op == "3":# OPCION 3: LISTAR SERVICIOS DISPONIBLES
+                print("\nCATÁLOGO DE SERVICIOS:") # Muestra el catalogo completo de servicios.
+                for k, v in sistema.servicios.items(): print(f"[{k}] {v.mostrar_detalle()}") # Itera sobre cada servicio almacenado.
+            elif op == "4": # OPCIoN 4: CREAR UNA RESERVA 
+                correo = input("Correo del cliente: ")  # Solicita los datos necesarios para una reserva
+                id_s = input("Codigo del servicio: ").upper() # El codigo ingresado debe ser en mayuscuala. 
+                cant = float(input("Cantidad (horas/dias/sesiones): "))
+                # se crea la reserva llamando al método correspondiente
                 sistema.crear_reserva(correo, id_s, cant)
-            elif op == "5":
-                print("\nHISTORIAL DE RESERVAS:")
-                for r in sistema.reservas_globales: print(r.mostrar_detalle())
-            elif op == "6":
+            elif op == "5": # OPCION 5: LISTAR HISTORIAL DE RESERVAS
+                print("\nHISTORIAL DE RESERVAS:") # Muestra todas las reservas realizadas.
+                for r in sistema.reservas_globales: # Itera sobre la lista global de reservas.
+                    print(r.mostrar_detalle()) # Muestra cada detalle.
+            elif op == "6": # OPCION 6: CANCELAR UNA RESERVA 
                 # Cancelar la última reserva como ejemplo o pedir ID
                 if not sistema.reservas_globales:
-                    print("No hay reservas para cancelar.")
+                    print("No hay reservas para cancelar.") # mensaje cuando no reservas para cancelar
                 else:
-                    idx = int(input(f"Ingrese índice de reserva (0 a {len(sistema.reservas_globales)-1}): "))
-                    print(sistema.reservas_globales[idx].cancelar())
-            elif op == "7":
-                try:
+                    idx = int(input(f"Ingrese indice de reserva (0 a {len(sistema.reservas_globales)-1}): ")) # Solicita el indice de la reserva a cancelar.
+                    print(sistema.reservas_globales[idx].cancelar()) # Cancela la reserva.
+            elif op == "7":# OPCION 7: VER ARCHIVO DE LOGS.
+                try:  # Intenta abrir y leer el archivo de log.
                     with open("log_software_fj.txt", "r", encoding="utf-8") as f:
                         print("\n" + "—"*10 + " CONTENIDO DEL LOG " + "—"*10)
-                        print(f.read())
-                except FileNotFoundError: print("El archivo de log aún no se ha creado.")
-            elif op == "8":
-                sistema.ejecutar_simulacion_10_ops()
-            elif op == "9":
-                print("Cerrando sistema ¡Adios!")
+                        print(f.read()) # Muestra todo el contenido del log.
+                except FileNotFoundError: print("El archivo de log aun no se ha creado.") # Si el archivo no existe, informa al usuario.
+            elif op == "8": # OPCION 8: EJECUTAR PRUEBA AUTOMATICA 
+                sistema.ejecutar_simulacion_10_ops()  # Ejecuta la simulacion de 10 operaciones.
+            elif op == "9": # OPCION 9: SALIR DEL SISTEMA.
+                print("Cerrando sistema ¡Adios!") # Mensaje donde se este cerrando el sistema.
                 break
             else:
-                print(" Opcion no valida, intente nuevamente.")
+                print(" Opcion no valida, intente nuevamente.") # Mensaje donde se ingresa una opcion incorrecta.
         except ValueError:
-            mensage = "Error de entrada: Se esperaba un número y se recibió texto."
-            print(f" {mensage}")
-            LoggerSistema.registrar_evento(mensage, "ERROR")
-        except Exception as e:
-            print(f"Error inesperado: {e}")
-            LoggerSistema.registrar_error(e, "Interfaz_Usuario")
-
+            mensage = "Error de entrada: Se esperaba un número y se recibió texto." # Mensaje de error. 
+            LoggerSistema.registrar_evento(mensage, "ERROR") # Registra el error en el archivo de logs.
+        except Exception as e: # Captura  otra excepcion ingresada por el usurio.
+            print(f"Error inesperado: {e}") # Mensaje de error.
+            LoggerSistema.registrar_error(e, "Interfaz_Usuario") # Registra el error detallado en el sistema de logs.
+            # Llama a la función menú para iniciar el programa
 if __name__ == "__main__":
     menu()
 
