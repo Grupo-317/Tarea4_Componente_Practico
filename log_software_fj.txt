@@ -11,3 +11,33 @@
 [2026-05-12 13:45:41] [Informacion] Reserva Confirmada ID 1778611541720
 [2026-05-12 13:45:41] [Informacion] Intento de procesamiento ID 1778611541720 finalizado.
 [2026-05-12 13:45:41] [Informacion] Reserva 1778611541718 Cancelada por el usuario.
+[2026-05-12 16:29:37] [ERROR] Interfaz_Usuario - DatosInvalidosError: El correo ya existe
+[2026-05-12 17:05:25] [Informacion] Reserva Confirmada ID 1778623525323
+[2026-05-12 17:05:25] [Informacion] Intento de procesamiento ID 1778623525323 finalizado.
+[2026-05-12 17:05:25] [ERROR] Reserva 1778623525325 - ErrorFinanciero: Fallo en el calculo financiero interno
+[2026-05-12 17:05:25] [Error]  Causas : El descuento excede el costo
+[2026-05-12 17:05:25] [Informacion] Intento de procesamiento ID 1778623525325 finalizado.
+[2026-05-12 17:05:25] [ERROR] crear_reserva - ErrorSistemaFJ: No se pudo completar la reserva: Fallo en el calculo financiero interno
+[2026-05-12 17:05:25] [Informacion] Reserva Confirmada ID 1778623525327
+[2026-05-12 17:05:25] [Informacion] Intento de procesamiento ID 1778623525327 finalizado.
+[2026-05-12 17:05:25] [Informacion] Reserva Confirmada ID 1778623525329
+[2026-05-12 17:05:25] [Informacion] Intento de procesamiento ID 1778623525329 finalizado.
+[2026-05-12 17:05:25] [ERROR] Reserva 1778623525330 - ErrorFinanciero: Fallo en el calculo financiero interno
+[2026-05-12 17:05:25] [Error]  Causas : ReservaSala.calcular_costo() got an unexpected keyword argument 'tipo'
+[2026-05-12 17:05:25] [Informacion] Intento de procesamiento ID 1778623525330 finalizado.
+[2026-05-12 17:05:25] [ERROR] crear_reserva - ErrorSistemaFJ: No se pudo completar la reserva: Fallo en el calculo financiero interno
+[2026-05-12 17:05:25] [Informacion] Reserva 1778623525323 Cancelada por el usuario.
+[2026-05-12 17:05:32] [Informacion] Reserva Confirmada ID 1778623532933
+[2026-05-12 17:05:32] [Informacion] Intento de procesamiento ID 1778623532933 finalizado.
+[2026-05-12 17:05:32] [ERROR] Reserva 1778623532935 - ErrorFinanciero: Fallo en el calculo financiero interno
+[2026-05-12 17:05:32] [Error]  Causas : El descuento excede el costo
+[2026-05-12 17:05:32] [Informacion] Intento de procesamiento ID 1778623532935 finalizado.
+[2026-05-12 17:05:32] [ERROR] crear_reserva - ErrorSistemaFJ: No se pudo completar la reserva: Fallo en el calculo financiero interno
+[2026-05-12 17:05:32] [Informacion] Reserva Confirmada ID 1778623532937
+[2026-05-12 17:05:32] [Informacion] Intento de procesamiento ID 1778623532937 finalizado.
+[2026-05-12 17:05:32] [Informacion] Reserva Confirmada ID 1778623532938
+[2026-05-12 17:05:32] [Informacion] Intento de procesamiento ID 1778623532938 finalizado.
+[2026-05-12 17:05:32] [ERROR] Reserva 1778623532939 - ErrorFinanciero: Fallo en el calculo financiero interno
+[2026-05-12 17:05:32] [Error]  Causas : ReservaSala.calcular_costo() got an unexpected keyword argument 'tipo'
+[2026-05-12 17:05:32] [Informacion] Intento de procesamiento ID 1778623532939 finalizado.
+[2026-05-12 17:05:32] [ERROR] crear_reserva - ErrorSistemaFJ: No se pudo completar la reserva: Fallo en el calculo financiero interno

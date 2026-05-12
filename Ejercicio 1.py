@@ -81,7 +81,8 @@ class Cliente(EntidadSistema): # Creamos la clase Cliente
         self.reservas = [] 
 
     @property
-    def nombre(self): return self.__nombre # Muestra el nombre
+    def nombre(self):
+        return self.__nombre # Muestra el nombre
 
     @nombre.setter
     def nombre(self, valor):
@@ -105,21 +106,27 @@ class Cliente(EntidadSistema): # Creamos la clase Cliente
         return f"Cliente: {self.nombre} | Email: {self.correo}"    # Muestra en pantalla cliente: nombre y correo.       
 class ReservaSala(Servicio):  # Subclase para reserva de salas.
     def calcular_costo(self, horas, descuento=0, aplicar_impuesto=False):
-        if float(horas) <= 0: raise DatosInvalidosError("Las horas deben ser positivas") # Valida que no se ingresen horas negativas o cero
+        if float(horas) <= 0: 
+            raise DatosInvalidosError("Las horas deben ser positivas") # Valida que no se ingresen horas negativas o cero
         total = (self.precio_base * float(horas)) - descuento # Calcula: Precio por hora * cantidad de horas y le resta el descuento. 
-        if total < 0: raise ErrorFinanciero("El descuento excede el costo") # Mensaje de error 
+        if total < 0: 
+            raise ErrorFinanciero("El descuento excede el costo") # Mensaje de error 
         return self.aplicar_impuesto(total) if aplicar_impuesto else total
          
-    def mostrar_detalle(self): return f" SALA: {self.nombre} (${self.precio_base}/h)" # Muestra el nombre de la sala y cuánto cuesta cada hora
-    def validar_datos(self): return self.precio_base > 0 # Revisa que el precio de la sala sea mayor a cero para ser valido
+    def mostrar_detalle(self): 
+        return f" SALA: {self.nombre} (${self.precio_base}/h)" # Muestra el nombre de la sala y cuánto cuesta cada hora
+    def validar_datos(self): 
+        return self.precio_base > 0 # Revisa que el precio de la sala sea mayor a cero para ser valido
         
 class AlquilerEquipos(Servicio): # Subclase para alquiler de equipos.
     def calcular_costo(self, dias, incluye_seguro=False):# Metodo para calcular costos.
         costo = self.precio_base * float(dias)  
         if incluye_seguro: costo *= 1.15 # Muestra el nombre del equipo y su costo por día
         return costo
-    def mostrar_detalle(self): return f" EQUIPO: {self.nombre} (${self.precio_base}/día)" # Muestra el nombre del equipo y su costo por día
-    def validar_datos(self): return self.precio_base > 0 # Asegura que no se alquilen equipos con precio base de $0
+    def mostrar_detalle(self): 
+        return f" EQUIPO: {self.nombre} (${self.precio_base}/día)" # Muestra el nombre del equipo y su costo por día
+    def validar_datos(self): 
+        return self.precio_base > 0 # Asegura que no se alquilen equipos con precio base de $0
 
 class AsesoriaEspecializada(Servicio): # Subclase para asesoria especialisadas.
     def calcular_costo(self, sesiones, tipo="ESTANDAR"):
@@ -127,8 +134,10 @@ class AsesoriaEspecializada(Servicio): # Subclase para asesoria especialisadas.
         if str(tipo).upper() == "PREMIUM": costo *= 0.85 # Si la asesoría es "PREMIUM", se aplica un descuento.
         return costo
 
-    def mostrar_detalle(self): return f" ASESORÍA: {self.nombre} (${self.precio_base} base)" # Muestra el tipo de asesoría y su precio base
-    def validar_datos(self): return self.precio_base > 0   # Verifica que la asesoría tenga un precio definido
+    def mostrar_detalle(self): 
+        return f" ASESORÍA: {self.nombre} (${self.precio_base} base)" # Muestra el tipo de asesoría y su precio base
+    def validar_datos(self): 
+        return self.precio_base > 0   # Verifica que la asesoría tenga un precio definido
 
 class Reserva(EntidadSistema):# Define la subcase reserva que hereda de EntidadSistema.
     def __init__(self, cliente, servicio, cantidad, **params):# prepara los datos necesario para registrar una nueva reserva.
@@ -187,9 +196,10 @@ class SistemaFJ:
         self.servicios["S2"] = AlquilerEquipos("Laptop Pro", 35000) # Nombre del servicio y su costo
         self.servicios["S3"] = AsesoriaEspecializada("Consultoría Python ", 120000) # Nombre del servicio y su costo
       #  Crea un nuevo cliente y lo guarda en el sistema. Verifica que el correo no esté repetido para evitar errores.
-    def registrar_cliente(self, nombre, correo): # Registar nombre y correo del cliente.
-        if correo in self.clientes: raise DatosInvalidosError("El correo ya existe") # Mensaje de error
-        nuevo = Cliente(nombre, correo)
+    def registrar_cliente(self, nombre, correo, telefono=""): # Registar nombre,  correo, telefono  del cliente.
+        if correo in self.clientes: 
+            raise DatosInvalidosError("El correo ya existe") # Mensaje de error
+        nuevo = Cliente(nombre, correo, telefono)
         self.clientes[correo] = nuevo  # Guarda al cliente usando el correo.
         print(f" Cliente {nombre} registrado exitosamente.") # mensaje cuando el registro es valido
         # Une a un Cliente con un Servicio para generar una transacción final.
@@ -252,7 +262,30 @@ def menu():
         try:
             if op == "1": # OPCION 1: REGISTRAR NUEVO CLIENTE
             
-                sistema.registrar_cliente(input("Nombre completo: "), input("Correo electronico: ")) # Solicita nombre y correo, luego registra al cliente en el sistema.
+            # 1. Validar NOMBRE (mínimo 3 caracteres)
+                while True:
+                     nombre = input("Nombre completo: ")
+                     if len(nombre.strip()) >= 3:
+                      break
+                     print("--> [!] Error: El nombre debe tener al menos 3 caracteres.")
+
+            # 2. Validar CORREO (debe tener @ y .)
+                while True:
+                    correo = input("Correo electronico: ")
+                    if "@" in correo and "." in correo:
+                     break
+                    print("--> [!] Error: Ingrese un correo válido (ejemplo@mail.com).")
+            
+            # Validación específica para el teléfono
+                while True:
+                    telefono = input("Número de celular: ")
+                    if telefono.isdigit(): # Verifica que solo contenga números
+                       break # Si es válido, sale del bucle
+                    else:
+                      print("--> [!] Error: El teléfono debe contener solo números. Intente de nuevo.")
+            
+            # Ahora enviamos los datos validados al sistema
+                sistema.registrar_cliente(nombre, correo, telefono)                
             elif op == "2": # OPCION 2: REGISTRAR NUEVO SERVICIO
                 print("Tipos: 1.Sala | 2.Equipo | 3.Asesoría")  # Muestra los tipos de servicios disponibles.
                 sistema.registrar_servicio(input("Tipo: "), input("Código (ej. S5): "),input("Nombre: "), float(input("Precio base: ")))  # Registra un nuevo servicio con sus caracteristicas.
