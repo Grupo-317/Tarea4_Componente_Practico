@@ -290,8 +290,8 @@ def menu():
             else:
                 print(" Opcion no valida, intente nuevamente.") # Mensaje donde se ingresa una opcion incorrecta.
         except ValueError:
-            mensage = "Error de entrada: Se esperaba un número y se recibió texto." # Mensaje de error. 
-            LoggerSistema.registrar_evento(mensage, "ERROR") # Registra el error en el archivo de logs.
+            mensaje = "Error de entrada: Asegurese de ingresar solo numeros, no letras."  # Mensaje de error. 
+            LoggerSistema.registrar_evento(mensaje, "ERROR") # Registra el error en el archivo de logs.
         except Exception as e: # Captura  otra excepcion ingresada por el usurio.
             print(f"Error inesperado: {e}") # Mensaje de error.
             LoggerSistema.registrar_error(e, "Interfaz_Usuario") # Registra el error detallado en el sistema de logs.
